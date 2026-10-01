@@ -4,8 +4,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Ruta relativa al script, así funciona sin importar desde qué carpeta se ejecute.
-# Si se ejecuta línea por línea (Shift+Enter) no existe __file__, entonces se usa la ruta desde la carpeta del proyecto.
 try:
     BASE_DIR = Path(__file__).parent
 except NameError:
