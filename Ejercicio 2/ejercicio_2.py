@@ -33,7 +33,7 @@ for i, img in enumerate([img_vacia, img1, img2, img3, img4]):
 
 # Empezamos viendo las columnas
 
-img_vacia_th = img_vacia <= 0
+img_vacia_th = img_vacia == 0
 plt.imshow(img_vacia_th, cmap='gray'), plt.title("Imagen binaria")
 plt.show()
 
@@ -49,17 +49,17 @@ plt.imshow(img_vacia[:,149:250], cmap='gray'), plt.title("Imagen binaria")
 plt.show()
 
 # Prueba para ver la idea de como realizarlo
-"""
-img1_th = img1 <= 0
+
+img1_th = img1 == 0
 plt.imshow(img1_th, cmap='gray'), plt.title("Imagen binaria")
 plt.show()
 
-img1_rows = np.sum(img1_th, axis=0) 
-np.unique(img1_rows) # -> elegimos un umbral mayor o igual 400
+img1_cols = np.sum(img1_th, axis=0) 
+np.unique(img1_cols) # -> elegimos un umbral mayor o igual 400
 
-img1_rows_th = img1_rows >= 400
-img1_rows_th
-np.argwhere(img1_rows_th)
+img1_cols_th = img1_cols >= 500
+img1_cols_th
+np.argwhere(img1_cols_th)
 
 # Se toma img1 y se hace el crop sobre la columna legajo para luego dividir por registros 
 
@@ -83,46 +83,55 @@ celda_prueba = prueba[210:286,:]
 plt.imshow(celda_prueba, cmap='gray'), plt.title("Imagen binaria")
 plt.show()
 
-# Prueba para ver el umbral de las columnas sobre la totalidad de las imagenes
-diccionario_columnas = {}
-for i, img in enumerate([img1, img2, img3, img4]):
-    img_th = img <= 0
-    img_cols = np.sum(img_th, axis=0)
-    print(f"Imagen {i}: {np.unique(img_cols)}")
-    # Tenemos el umbral (th >= 548) para saber que columnas de la imagen separan a los campos
-    img_cols_th = img_cols >= 548
-    print(f"Imagen {i}: {np.argwhere(img_cols_th)}")
 
-# Intento de recortar las columnas de cada imagen 
+# obtener las celdas de cada columnas de cada imagen 
 
-diccionario_columnas = {}
-for i, img in enumerate([img1, img2, img3, img4]):
-    img_th = img <= 0
+diccionario_imagenes = {}
+
+for i, img in enumerate([img1,img2,img3,img4]):
+    imagen = f"imagen {i+1}"
+    diccionario_imagenes[imagen] = {}
+    img_th = img == 0
     img_cols = np.sum(img_th, axis=0)
-    print(f"Imagen {i}: {np.unique(img_cols)}")
+    print(f"Imagen {i+1}: {np.unique(img_cols)}")
     
-    indices_columnas = np.where(img_cols >= 548)[0] # Hay que el primer elemento de la tupla
-    print(f"Índices detectados para Imagen {i}: {indices_columnas}")
+    indices_columnas = np.argwhere(img_cols >= np.unique(img_cols)[-2])
+    print(f"Índices detectados para Imagen {i+1}: {indices_columnas}")
+
+    indices_columnas = indices_columnas.flatten() # pasar a una dimension 
 
     # Iteramos sobre los índices encontrados para cortar la imagen
-    for col in range(1, 8):  # Itera 7 veces (de 1 a 7)
-        index = col - 1  # Ajustamos el índice para empezar en 0
+    for col in range(len(indices_columnas) - 1):  # Itera 7 veces (de 1 a 7)
+        columna = f"Colomuna: {col + 1}"
+        diccionario_imagenes[imagen][columna] = {} 
         
-        if index + 1 < len(indices_columnas): # Nos aseguramos de no pasarnos del límite de columnas detectadas
-            inicio = indices_columnas[index]
-            fin = indices_columnas[index + 1]
+        inicio_columna = indices_columnas[col]
+        fin_columna = indices_columnas[col + 1]
             
             # Ahora sí recortamos usando posiciones numéricas válidas
-            diccionario_columnas[col] = img[:, inicio:fin]
-            
-            plt.imshow(diccionario_columnas[col], cmap="gray")
-            plt.title(f"Imagen {i} - Columna {col}")
-            plt.show()
+        inicio_columna_sin_borde = inicio_columna + 3
+        fin_columna_sin_borde = fin_columna - 3
+        columna_recortada = img[:, inicio_columna_sin_borde : fin_columna]
 
-Idea para continuar: seguir en este for pero ahora iterando sobre cada columna, la idea de agarrar la fila es lo mismo con la columna,
-se puede copiar el código de prueba que está al principio para agarrar las filas. Con esto hecho ya tendríamos las celdas, habría que verificar
-que no quede ninguna linea del borde de la celda dentro de la imagen recortada para no generar ruido, eso se puede hacer
-achicando la imagen sumandole el indice de columna y fila en 3 por ejemplo, ya que despues a cada imagen de celda hay que aplicarle
-cv2.connectedComponentsWithStats(image, connectivity, ltype) para hacer la verificación de los caracteres que eso habría que pensarlo,
-como también hay que pensar como guardar todas las celdas en alguna especie de lista de diccionarios para más adelante.
-"""
+        columna_recortada_th = columna_recortada == 0
+        columna_recortada_filas = np.sum(columna_recortada_th, axis=1)
+        print(f"Columna {col}: {np.unique(columna_recortada_filas)}")
+
+        indices_filas = np.argwhere(columna_recortada_filas >= np.unique(columna_recortada_filas)[-1])
+        print(f"Índices detectados para las filas: {indices_filas}")
+
+        indices_filas = indices_filas.flatten()
+
+        for fila in range(len(indices_filas) - 1):
+            celda =  f"Celda: {fila + 1}"
+            inicio_celda = indices_filas[fila]
+            fin_celda = indices_filas[fila+1]
+
+            inicio_celda_sin_borde = inicio_celda + 3
+            fin_celda_sin_borde = fin_celda - 3
+            diccionario_imagenes[imagen][columna][celda] = columna_recortada[inicio_celda_sin_borde : fin_celda, :]
+
+            
+            #plt.imshow(diccionario_imagenes[imagen][columna][celda], cmap="gray", vmin=0, vmax=255)
+            #plt.title(f"Imagen {i+1} - Columna {col+1} - Celda {fila+1}")
+            #plt.show()
