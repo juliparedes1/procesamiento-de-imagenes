@@ -4,11 +4,13 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 try:
     BASE_DIR = Path(__file__).parent
 except NameError:
     BASE_DIR = Path.cwd() / "Ejercicio 1" if (Path.cwd() / "Ejercicio 1").exists() else Path.cwd()
 IMG_PATH = BASE_DIR / "Imagen_con_detalles_escondidos.tif"
+
 
 # --- Imagen Original -------------------------------------------------------------------------
 
@@ -30,7 +32,7 @@ plt.show()
 
 
 
-# --- a) Ecualización local de histograma -----------------------------------------------------
+# Ecualización local de histograma 
 def ecualizacion_local(img, M, N):
     # img    : Imagen de entrada en escalas de grises (2D), formato uint8.
     # M, N   : Tamaño de la ventana (alto x ancho). Enteros positivos, preferentemente impares
@@ -47,7 +49,7 @@ def ecualizacion_local(img, M, N):
     return img_eq
 
 
-# --- b) Análisis de la imagen con ecualización local ------------------------------------------
+# Análisis de la imagen con ecualización local 
 img_eloc = ecualizacion_local(img, 15, 15)
 
 plt.figure()
@@ -58,7 +60,7 @@ plt.imshow(img_eloc, cmap='gray', vmin=0, vmax=255), plt.title('Ecualización lo
 plt.show()
 
 
-# --- c) Influencia del tamaño de la ventana ---------------------------------------------------
+# Influencia del tamaño de la ventana 
 ventanas = [(3, 3), (7, 7), (15, 15), (31, 31), (51, 51), (101, 101)]
 
 plt.figure()
