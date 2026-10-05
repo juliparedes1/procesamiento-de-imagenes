@@ -24,3 +24,10 @@ venv\Scripts\activate
 source venv/bin/activate
 
 pip install opencv-python numpy matplotlib
+
+### librerias utilizadas y sus versiones:
+numpy==2.5.3
+matplotlib==3.11.2
+opencv-python==5.0.0.93
+csv
+pathlib
