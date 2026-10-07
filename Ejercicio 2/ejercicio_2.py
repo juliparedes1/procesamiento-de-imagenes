@@ -387,7 +387,7 @@ for imagen, registros in resultados.items():
                 desaprobados.append((condicion, crop_nombre))
                 print(f"{imagen} - Registro {registro['ID']}: Condición {condicion}")
 
-    nombre_archivo = imagen.replace(" ", "_")
+    nombre_archivo = imagen.replace(":", "").replace(" ", "_")
     img_desaprobados = generar_imagen_desaprobados(desaprobados, f"Planilla {imagen.split()[-1]} - Alumnos no aprobados")
     cv2.imwrite(str(carpeta_salida / f"desaprobados_{nombre_archivo}.png"), img_desaprobados)
 
